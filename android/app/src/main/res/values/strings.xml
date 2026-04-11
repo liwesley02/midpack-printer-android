@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">midpack2-android-wrapper</string>
+    <string name="title_activity_main">midpack2-android-wrapper</string>
+    <string name="package_name">com.happykitchens.midpack2</string>
+    <string name="custom_url_scheme">com.happykitchens.midpack2</string>
+</resources>

@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # Allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,36 +22,21 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Install Android SDK components
-      run: |
-        sdkmanager "platforms;android-34" "build-tools;34.0.0"
-        yes | sdkmanager --licenses || true
-
     - name: Verify Brother SDK
       run: |
         echo "Checking for Brother SDK AAR file..."
         ls -lh android/app/libs/BrotherPrintLibrary.aar
         echo "✓ Brother SDK found"
 
-    - name: Make gradlew executable
+    - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
 
-    - name: Build debug APK
-      run: |
-        cd android
-        ./gradlew assembleDebug --stacktrace
+    - name: Build with Gradle
+      run: cd android && ./gradlew assembleDebug --no-daemon --stacktrace
 
-    - name: Upload APK artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: midpack2-debug-apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
-
-    - name: Create release (if tagged)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: android/app/build/outputs/apk/debug/app-debug.apk
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

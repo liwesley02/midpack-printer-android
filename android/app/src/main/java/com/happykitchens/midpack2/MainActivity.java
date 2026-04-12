@@ -28,6 +28,9 @@ import com.getcapacitor.BridgeActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +59,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         if (executorService != null) {
             executorService.shutdown();
@@ -270,8 +273,28 @@ public class MainActivity extends BridgeActivity {
                         labelText.append(itemCount).append(" item").append(itemCount > 1 ? "s" : "").append("\n");
                     }
 
-                    // Print the label
-                    PrinterStatus status = brotherPrinter.printText(labelText.toString());
+                    // Print the label via temp file
+                    File tempFile = null;
+                    PrinterStatus status;
+                    try {
+                        // Create temp file with label text
+                        tempFile = File.createTempFile("brother_label_", ".txt", getCacheDir());
+                        FileWriter writer = new FileWriter(tempFile);
+                        writer.write(labelText.toString());
+                        writer.close();
+
+                        // Print the file
+                        status = brotherPrinter.printFile(tempFile.getAbsolutePath());
+                    } catch (IOException e) {
+                        Log.e(TAG, "Failed to create temp label file", e);
+                        notifyCallback(callbackId, false, "Print failed: " + e.getMessage());
+                        return;
+                    } finally {
+                        // Clean up temp file
+                        if (tempFile != null && tempFile.exists()) {
+                            tempFile.delete();
+                        }
+                    }
                     brotherPrinter.endCommunication();
 
                     if (status.errorCode == PrinterInfo.ErrorCode.ERROR_NONE) {

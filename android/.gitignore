@@ -91,7 +91,7 @@ lint/tmp/
 *.hprof
 
 # Cordova plugins for Capacitor
-capacitor-cordova-android-plugins
+# capacitor-cordova-android-plugins  # Commented out - we need these files for GitHub Actions build
 
 # Copied web assets
 app/src/main/assets/public

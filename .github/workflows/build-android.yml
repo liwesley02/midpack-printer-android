@@ -46,3 +46,32 @@ jobs:
         name: app-debug
         path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
+
+    - name: Generate release tag
+      id: tag
+      run: |
+        echo "release_tag=v$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: success()
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        name: Android Build ${{ steps.tag.outputs.release_tag }}
+        body: |
+          Automated Android APK build
+
+          **Installation:**
+          1. Download `midpack-printer.apk` below
+          2. Transfer to tablet via USB or cloud storage
+          3. Enable "Install from unknown sources" in tablet settings
+          4. Tap the APK file to install
+
+          **Build Info:**
+          - Commit: ${{ github.sha }}
+          - Built: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        files: |
+          android/app/build/outputs/apk/debug/app-debug.apk
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

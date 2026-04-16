@@ -28,10 +28,14 @@ jobs:
       run: npm install
 
     - name: Build web assets
-      run: npm run build
+      run: |
+        npm run build
+        ls -la dist/
 
     - name: Sync to Android
-      run: npx cap sync android
+      run: |
+        npx cap sync android
+        ls -la android/app/src/main/assets/
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
